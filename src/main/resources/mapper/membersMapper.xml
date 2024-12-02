@@ -4,8 +4,12 @@
  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
  <!-- namespace는 반드시 mapper의 위치로 설정.+ 내가 사용하고자하는 맵퍼이름까지 -->
-<mapper namespace="com.ict.edu3.domain.auth.mapper.AuthMapper">
-	<select id="selectMember" parameterType="String" resultType="UserVO">
+<mapper namespace="com.ict.edu3.domain.members.mapper.MembersMapper">
+	<insert id="getMembersJoin" parameterType="MembersVO" >
+  insert into members(m_id,m_pw,m_name,m_age,m_reg)
+  values(#{m_id},#{m_pw},#{m_name},#{m_age},now())
+  </insert>
+  <select id="getMembersById" parameterType="String" resultType="MembersVO">
   select * from members where m_id= #{m_id}
   </select>
 </mapper>
