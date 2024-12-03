@@ -41,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        // 토큰이 있으며 Authorization 안에 'Bearer '로 시작
+        // 토큰이 있으면서 Authorization 안에 'Bearer '로 시작
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             // 토큰 추출
             jwtToken = requestTokenHeader.substring(7);
