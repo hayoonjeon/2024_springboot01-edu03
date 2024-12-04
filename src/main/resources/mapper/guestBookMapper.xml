@@ -3,20 +3,24 @@
  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
- <!-- namespace는 반드시 mapper의 위치로 설정.+ 내가 사용하고자하는 맵퍼이름까지 -->
+<!-- namespace는 반드시 mapper 위치로 설정해야 된다.  id는 해당하는 메소드 이름을 가져와야 한다.-->
 <mapper namespace="com.ict.edu3.domain.guestbook.mapper.GuestBookMapper">
-  <select id="getGuestBookList" resultType="GuestBookVO">
-  select * from guestbook order by gb_idx desc
-  </select>
-  <select id="getGuestBookById" parameterType="String" resultType="GuestBookVO">
-  select * from guestbook where gb_idx=#{gb_idx}
-  </select>
-  <delete id="getGuestBookDelete" parameterType="String" >
-  delete  from guestbook where gb_idx=#{gb_idx}
-  </delete>
+    <select id="getGuestBookList" resultType="GuestBookVO">
+        select * from guestbook order by gb_idx desc
+    </select>
+
+    <select id="getGuestBookById" parameterType="String"  resultType="GuestBookVO" >
+        select * from guestbook where gb_idx = #{gb_idx}
+    </select>
+    <delete id="getGuestBookDelete" parameterType="String">
+        delete from guestbook where gb_idx = #{gb_idx}
+    </delete>
+
+    <update id="getGuestBookUpdate" parameterType="GuestBookVO">
+        update guestbook 
+        set gb_name = #{gb_name}, gb_subject=#{gb_subject}, gb_email=#{gb_email}, gb_content=#{gb_content}
+        where gb_idx = #{gb_idx}
+    </update>
 </mapper>
-
-
-
 
 

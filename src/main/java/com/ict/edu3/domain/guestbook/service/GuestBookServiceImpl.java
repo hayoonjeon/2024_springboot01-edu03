@@ -23,7 +23,7 @@ private GuestBookMapper guestBookMapper;
 
   @Override
   public int getGuestBookUpdate(GuestBookVO vo) {
-    return 0;
+    return guestBookMapper.getGuestBookUpdate(vo);
   }
 
   @Override
