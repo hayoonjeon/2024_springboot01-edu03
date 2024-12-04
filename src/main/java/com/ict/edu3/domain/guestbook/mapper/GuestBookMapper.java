@@ -13,4 +13,5 @@ List<GuestBookVO> getGuestBookList();
 GuestBookVO getGuestBookById(String gb_idx);
 int getGuestBookUpdate(GuestBookVO vo);
 int getGuestBookDelete(String gb_idx);
+int getGuestBookWrite(GuestBookVO gvo);
 }

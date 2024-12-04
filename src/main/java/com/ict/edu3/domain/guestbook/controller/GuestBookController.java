@@ -1,5 +1,6 @@
 package com.ict.edu3.domain.guestbook.controller;
 
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import com.ict.edu3.domain.guestbook.vo.GuestBookVO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -125,11 +127,7 @@ public class GuestBookController {
 
   @PostMapping("/write")
   public DataVO getGuestBookWrite(
-      @RequestParam("gb_name") String gb_name,
-      @RequestParam("gb_subject") String gb_subject,
-      @RequestParam("gb_content") String gb_content,
-      @RequestParam("gb_email") String gb_email,
-      @RequestParam(value = "file", required = false) MultipartFile file,
+      @ModelAttribute("data") GuestBookVO gvo,
       Authentication authentication) {
 
     DataVO dataVO = new DataVO();
@@ -140,20 +138,22 @@ public class GuestBookController {
         dataVO.setMessage("로그인이 필요합니다.");
         return dataVO;
       }
-      log.info(gb_name);
-      log.info(gb_subject);
-      log.info(gb_content);
-      log.info(gb_email);
-      log.info(file.getOriginalFilename());
-      // 파라미터 확인
-      // int result = guestBookService.getGuestBookUpdate(gvo);
-      String fileName=null;
-      if (file != null && file.isEmpty()) {
-        String originalFileName=file.getOriginalFilename();
-        String fileExtendsion = originalFileName.substring(originalFileName.lastIndexOf("."));
-        String uuidFileName= UUID.randomUUID().toString() + fileExtendsion;
+      //로그인한사람의 id 추출
+      gvo.setGb_id(authentication.getName());
+      MultipartFile file = gvo.getFile();
+      if (file == null || file.isEmpty()) {
+        gvo.setGb_filename("");
+      }else{
+        UUID uuid = UUID.randomUUID();
+        String f_name = uuid.toString()+"_"+file.getOriginalFilename();
+        gvo.setGb_filename(f_name);
+        //프로젝트 내부의 resources/static/upload 경로
+        String path = new File("src/main/resources/static/upload").getAbsolutePath();
+        //실질적인 파일업로드
+        file.transferTo(new File(path,f_name));
       }
-      int result = 0;
+      //게스트북 쓰기
+      int result = guestBookService.getGuestBookWrite(gvo);
       if (result == 0) {
         dataVO.setSuccess(false);
         dataVO.setMessage("게스트북 쓰기 실패");
@@ -165,6 +165,7 @@ public class GuestBookController {
     } catch (Exception e) {
       dataVO.setSuccess(false);
       dataVO.setMessage("게스트북 쓰기 오류 발생");
+      System.out.println(e);
     }
     return dataVO;
   }

@@ -31,5 +31,10 @@ private GuestBookMapper guestBookMapper;
     return guestBookMapper.getGuestBookDelete(gb_idx);
   }
 
+  @Override
+  public int getGuestBookWrite(GuestBookVO gvo) {
+    return guestBookMapper.getGuestBookWrite(gvo);
+  }
+
  
 }

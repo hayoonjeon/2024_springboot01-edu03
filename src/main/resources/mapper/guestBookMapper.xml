@@ -21,6 +21,10 @@
         set gb_name = #{gb_name}, gb_subject=#{gb_subject}, gb_email=#{gb_email}, gb_content=#{gb_content}
         where gb_idx = #{gb_idx}
     </update>
+   <insert id="getGuestBookWrite" parameterType="GuestBookVO">
+    insert into guestbook (gb_name, gb_subject, gb_content, gb_email, gb_pw, gb_regdate, gb_filename, gb_id)
+    values (#{gb_name}, #{gb_subject}, #{gb_content}, #{gb_email}, #{gb_pw}, now(), #{gb_filename}, #{gb_id})
+</insert>
 </mapper>
 
 
