@@ -1,11 +1,22 @@
 package com.ict.edu3.domain.guestbook.controller;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +40,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 public class GuestBookController {
   @Autowired
   private GuestBookService guestBookService;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
   @GetMapping("/list")
   public DataVO getGuestBookList() {
@@ -138,21 +151,23 @@ public class GuestBookController {
         dataVO.setMessage("로그인이 필요합니다.");
         return dataVO;
       }
-      //로그인한사람의 id 추출
+      // 로그인한사람의 id 추출
       gvo.setGb_id(authentication.getName());
+      gvo.setGb_pw(passwordEncoder.encode(gvo.getGb_pw()));
+
       MultipartFile file = gvo.getFile();
       if (file == null || file.isEmpty()) {
         gvo.setGb_filename("");
-      }else{
+      } else {
         UUID uuid = UUID.randomUUID();
-        String f_name = uuid.toString()+"_"+file.getOriginalFilename();
+        String f_name = uuid.toString() + "_" + file.getOriginalFilename();
         gvo.setGb_filename(f_name);
-        //프로젝트 내부의 resources/static/upload 경로
+        // 프로젝트 내부의 resources/static/upload 경로
         String path = new File("src/main/resources/static/upload").getAbsolutePath();
-        //실질적인 파일업로드
-        file.transferTo(new File(path,f_name));
+        // 실질적인 파일업로드
+        file.transferTo(new File(path, f_name));
       }
-      //게스트북 쓰기
+      // 게스트북 쓰기
       int result = guestBookService.getGuestBookWrite(gvo);
       if (result == 0) {
         dataVO.setSuccess(false);
@@ -169,4 +184,24 @@ public class GuestBookController {
     }
     return dataVO;
   }
+
+  @GetMapping("/download/{filename}")
+  public ResponseEntity<Resource> downloadFile(@PathVariable String filename) {
+    try {
+      Path filePath = Paths.get("src/main/resources/static/upload").resolve(filename).normalize();
+      Resource resource = new UrlResource(filePath.toUri());
+      if (!resource.exists()) {
+        throw new FileNotFoundException("File not found: " + filename);
+      }
+
+      return ResponseEntity.ok()
+          .contentType(MediaType.APPLICATION_OCTET_STREAM)
+          .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+          .body(resource);
+
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+  }
+
 }
