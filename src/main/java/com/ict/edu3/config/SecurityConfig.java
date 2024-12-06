@@ -61,23 +61,23 @@ public class SecurityConfig {
                 // oauth2login 설정
                 // successHandler : 로그인성공시 호출
                 // userInfoEndpoint : 인증과정에서 인증된 사용자에 대한 정보제공API 엔드포인트
-                // .oauth2Login(oauth2 -> oauth2
-                        // .successHandler(oauth2AuthenticationSuccesHandler)
-                        // .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService())))
+                 .oauth2Login(oauth2 -> oauth2
+                         .successHandler(oauth2AuthenticationSuccesHandler)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService())))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // @Bean
-    // Oauth2AuthenticationSuccesHandler oauth2AuthenticationSuccesHandler(){
-    //     return new Oauth2AuthenticationSuccesHandler(jwtUtil,userDetailService);
-    // }
+     @Bean
+    /Oauth2AuthenticationSuccesHandler oauth2AuthenticationSuccesHandler(){
+         return new Oauth2AuthenticationSuccesHandler(jwtUtil,userDetailService);
+     }
 
-    // @Bean
-    // OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
-    //     return new CustomerOAuth2UserService();
-    // }
+     @Bean
+     OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
+         return new CustomerOAuth2UserService();
+     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
