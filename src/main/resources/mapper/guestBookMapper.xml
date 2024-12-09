@@ -3,28 +3,29 @@
  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- namespace는 반드시 mapper 위치로 설정해야 된다.  id는 해당하는 메소드 이름을 가져와야 한다.-->
+<!-- namespace는 반드시 mapper 위치로 설정해야 된다. -->
 <mapper namespace="com.ict.edu3.domain.guestbook.mapper.GuestBookMapper">
-    <select id="getGuestBookList" resultType="GuestBookVO">
-        select * from guestbook order by gb_idx desc
-    </select>
+	<select id="getGuestBookList" resultType="GuestBookVO">
+		select * from guestbook order by gb_idx asc
+	</select>
 
-    <select id="getGuestBookById" parameterType="String"  resultType="GuestBookVO" >
-        select * from guestbook where gb_idx = #{gb_idx}
-    </select>
-    <delete id="getGuestBookDelete" parameterType="String">
-        delete from guestbook where gb_idx = #{gb_idx}
-    </delete>
+	<select id="getGuestBookById" parameterType="String"  resultType="GuestBookVO" >
+		select * from guestbook where gb_idx = #{gb_idx}
+	</select>
+	<delete id="getGuestBookDelete" parameterType="String">
+		delete from guestbook where gb_idx = #{gb_idx}
+	</delete>
+	<update id="getGuestBookUpdate" parameterType="GuestBookVO">
+		update guestbook
+		set gb_name = #{gb_name},gb_subject=#{gb_subject}, gb_email=#{gb_email}, gb_content=#{gb_content}
+		where gb_idx = #{gb_idx}
+	</update>
 
-    <update id="getGuestBookUpdate" parameterType="GuestBookVO">
-        update guestbook 
-        set gb_name = #{gb_name}, gb_subject=#{gb_subject}, gb_email=#{gb_email}, gb_content=#{gb_content}
-        where gb_idx = #{gb_idx}
-    </update>
-   <insert id="getGuestBookWrite" parameterType="GuestBookVO">
-    insert into guestbook (gb_name, gb_subject, gb_content, gb_email, gb_pw, gb_regdate, gb_filename, gb_id)
-    values (#{gb_name}, #{gb_subject}, #{gb_content}, #{gb_email}, #{gb_pw}, now(), #{gb_filename}, #{gb_id})
-</insert>
+	<insert id="getGuestBookWrite" parameterType="GuestBookVO">
+        INSERT INTO guestbook (
+            gb_name, gb_subject, gb_pw, gb_content, gb_email, gb_filename, gb_regdate, gb_id
+        ) VALUES (
+            #{gb_name}, #{gb_subject}, #{gb_pw}, #{gb_content}, #{gb_email}, #{gb_filename}, NOW(), #{gb_id}
+        )
+    </insert>
 </mapper>
-
-

@@ -79,7 +79,7 @@ public class JwtUtil {
     public Boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-    //만료시간 불러오기
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

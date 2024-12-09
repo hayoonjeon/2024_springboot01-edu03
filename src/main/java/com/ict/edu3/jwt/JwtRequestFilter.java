@@ -35,41 +35,37 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        logger.info("JwtRequestFilter 호출\n");
+        log.info("JwtRequestFilter 호출\n");
         // 요청 헤더에서 Authorization 값 확인
         final String requestTokenHeader = request.getHeader("Authorization");
         String username = null;
         String jwtToken = null;
 
-        // 토큰이 있으면서 Authorization 안에 'Bearer '로 시작
+        // 토큰이 있으며 Authorization 안에 'Bearer '로 시작
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             // 토큰 추출
             jwtToken = requestTokenHeader.substring(7);
-
-            log.info("JwtRequestFilter 추출 메서드\n");
+            log.info("JwtRequestFilter 추출메서드\n");
             try {
                 // 이름추출 (id)
                 username = jwtUtil.extractuserName(jwtToken);
-                logger.info("username:" + username);
-                
+                log.info("username : " + username + "\n");
 
             } catch (Exception e) {
-                System.out.println("JWT 오류");
                 logger.warn("JWT Token error");
             }
         } else {
-            System.out.println("JWT 없음");
             logger.warn("JWT Token empty");
         }
 
         // 사용자이름(아이디)추출, 현재SecurityContext에 인증정보가 설정되었는지 확인 없으면 다음 단계진행
-        //DataVO에서 m_id, m_pw를 username, password
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // 사용자이름을 가지고 현재 DB에 있는지 검사
+            // 사용자이름을 가지고 현재 DB에 있는지 검사(MyUserDetailService에 있는 메서드 이용)
+            // DataVO에서 m_id, m_pw, 를 username, password
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             log.info("userDetails.username : " + userDetails.getUsername() + "\n");
-            log.info("userDetails.userpassword : " + userDetails.getPassword() + "\n");
+            log.info("userDetails.password : " + userDetails.getPassword() + "\n");
 
             if (jwtUtil.validateToken(jwtToken, userDetails)) {
                 // Spring Security 인증객체 생성
@@ -80,8 +76,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Spring Security 컨텍스트에 저장
+                // 인증 성공 후 아래 코드로 인증 객체를 SecurityContext에 설정
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            } else {
+                log.warn("JWT 토큰이 유효하지 않습니다");
             }
         }
         filterChain.doFilter(request, response);

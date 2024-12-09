@@ -8,18 +8,17 @@ import com.ict.edu3.domain.members.mapper.MembersMapper;
 
 @Service
 public class MembersServiceImpl implements MembersService {
-  @Autowired
-  private MembersMapper membersMapper;
+    @Autowired
+    private MembersMapper membersMapper;
 
-  @Override
-  public int getMembersJoin(MembersVO mvo) {
+    @Override
+    public int getMembersJoin(MembersVO mvo) {
+        return membersMapper.getMembersJoin(mvo);
+    }
 
-   return membersMapper.getMembersJoin(mvo);
-  }
-
-  @Override
-  public MembersVO getMembersById(String m_id) {
-    return membersMapper.getMembersById(m_id);
-  }
+    @Override
+    public MembersVO getMembersById(String m_id) {
+        return membersMapper.getMembersById(m_id);
+    }
 
 }

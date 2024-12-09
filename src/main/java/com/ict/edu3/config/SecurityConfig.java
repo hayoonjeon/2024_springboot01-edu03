@@ -32,55 +32,60 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final MyUserDetailService userDetailService;
 
-
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter,JwtUtil jwtUtil,MyUserDetailService userDetailService) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter, JwtUtil jwtUtil, MyUserDetailService userDetailService) {
         log.info("SecurityConfig 호출\n");
         this.jwtRequestFilter = jwtRequestFilter;
         this.jwtUtil = jwtUtil;
-        this.userDetailService=userDetailService;
+        this.userDetailService = userDetailService;
     }
 
     // 서버에 들어는 모든 요청은 SecurityFilterChain 을 거친다.
     // addFilterBefore 때문에 JwtRequestFilter가 먼저 실행된다.
+
+    // 클라이언트에서 http://localhost:8080/oauth2/authorization/kakao 클릭하면
+    // SecurityFilter 자동으로 OAutheAuthorizationReqeustRedirectFiler 가 특정URL에 오면
+    // 자동으로 application.yml 에 등록을 보고 자동 처리
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         log.info("SecurityFilterChain 호출\n");
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 // 요청별 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/upload/**").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/upload/**").permitAll() // URL 경로
+                        .requestMatchers("/oauth2/**").permitAll() // URL 경로
                         // 특정 URL에 인증없이 허용
                         .requestMatchers("/api/members/join", "/api/members/login",
                                 "/api/guestbook/list", "/api/guestbook/detail/**", "api/guestbook/download/**")
                         .permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated())
-                // oauth2login 설정
-                // successHandler : 로그인성공시 호출
-                // userInfoEndpoint : 인증과정에서 인증된 사용자에 대한 정보제공API 엔드포인트
-                 .oauth2Login(oauth2 -> oauth2
-                         .successHandler(oauth2AuthenticationSuccesHandler)
+
+                // oath2Login 설정
+                // successHandler => 로그인 성공 시 호출
+                // userInfoEndpoint => 인증과정에서 인증된 사용자에 대한 정보를 제공 하는 API 엔드포인트
+                // (사용자 정보를 가져오는 역할을 한다.)
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAth2AuthenticationSuccessHandler())
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService())))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-     @Bean
-    /Oauth2AuthenticationSuccesHandler oauth2AuthenticationSuccesHandler(){
-         return new Oauth2AuthenticationSuccesHandler(jwtUtil,userDetailService);
-     }
-
-     @Bean
-     OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
-         return new CustomerOAuth2UserService();
-     }
+    @Bean
+    OAth2AuthenticationSuccessHandler oAth2AuthenticationSuccessHandler() {
+        return new OAth2AuthenticationSuccessHandler(jwtUtil, userDetailService);
+    }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
+        return new CustomerOAuth2UserService();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
         // 허용할 Origin 설정
